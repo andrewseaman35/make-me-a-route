@@ -34,6 +34,7 @@ func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
     response, err := ddb.Scan(scanInput)
     if err != nil {
         http.Error(w, "Failed to scan", 400)
+        return
     }
     latitude, err := strconv.ParseFloat(getPlacesInput.Latitude, 64)
     if err != nil {
@@ -151,6 +152,7 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
     raw, err := ioutil.ReadAll(r.Body)
     if err != nil {
         http.Error(w, "Failed to read request body", 400)
+        return
     }
     log.Print("Read request body")
 
@@ -158,6 +160,7 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
     err = json.Unmarshal(raw, placeInput)
     if err != nil {
         http.Error(w, "Failed to unmarshal", 400)
+        return
     }
     log.Print("Unmarshaled")
 
@@ -213,6 +216,7 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
     log.Print("Put item")
     if err != nil {
         http.Error(w, err.Error(), 400)
+        return
     }
 
     raw, err = json.Marshal(response)
