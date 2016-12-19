@@ -134,7 +134,8 @@ def main():
 
     versions[args.service] = version
 
-    save_to_version_file(versions, metadata)
+    if args.action != "get":
+        save_to_version_file(versions, metadata)
 
     return versions[args.service]
 

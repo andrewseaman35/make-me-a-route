@@ -19,8 +19,8 @@ $(ZIP_NAME):
 
 build: clean $(ZIP_NAME)
 
-deploy_dev: build
-	eb use $(APPLICATION_NAME)-dev
+deploy: build
+	eb use $(APPLICATION_NAME)-$(ENV)
 	eb deploy
 
 clean:
