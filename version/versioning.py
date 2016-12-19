@@ -45,7 +45,7 @@ def update_metadata(metadata):
     """
     Updates relevant portions of version file metadata
     """
-    metadata["date_modified"] = str(datetime.datetime.now())
+    metadata["modified_time"] = str(datetime.datetime.now())
 
     return metadata
 
@@ -112,7 +112,7 @@ def main():
     initialize_arguments(parser)
     args = parser.parse_args()
     if not validate_arguments(args):
-        return
+        raise Exception("Invalid arguments")
 
     version_file = read_version_file()
     versions = version_file["versions"]
@@ -140,4 +140,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    print(main())
