@@ -10,7 +10,7 @@ RUN go get github.com/jmespath/go-jmespath
 RUN go get github.com/go-ini/ini
 
 WORKDIR /go
-RUN go build -o application
+RUN go build -o places-server
 
 EXPOSE 3000
-ENTRYPOINT /go/application
+ENTRYPOINT /go/places-server
