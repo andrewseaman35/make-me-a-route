@@ -4,7 +4,14 @@ import (
     "fmt"
 )
 
-type GetPlacesByIdOutput struct {
+type GetPlacesInRangeInput struct {
+    UserID string `json:"user_id"`
+    Latitude string `json:"latitude"`
+    Longitude string `json:"longitude"`
+    Radius string `json:"radius"'`
+}
+
+type GetPlacesOutput struct {
     Places []*Place `json:"places"`
     UserID string `json:"user_id"`
 }

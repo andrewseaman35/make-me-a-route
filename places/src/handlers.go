@@ -5,16 +5,94 @@ import (
     "log"
     "io/ioutil"
     "encoding/json"
+    "strconv"
     
     "github.com/aws/aws-sdk-go/aws"
     "github.com/aws/aws-sdk-go/service/dynamodb"
     "github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
+func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
+    raw, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+        http.Error(w, "Failed to read request body", 400)
+        return
+    }
+    
+    getPlacesInput := &GetPlacesInRangeInput{}
+    err = json.Unmarshal(raw, getPlacesInput)
+    if err != nil {
+        http.Error(w, "Failed to unmarshal", 400)
+        return
+    }
+    log.Print("Unmarshaled")
+
+    scanInput := &dynamodb.ScanInput {
+        TableName: aws.String(DDB_TABLE_NAME),
+    }
+
+    response, err := ddb.Scan(scanInput)
+    if err != nil {
+        http.Error(w, "Failed to scan", 400)
+    }
+    latitude, err := strconv.ParseFloat(getPlacesInput.Latitude, 64)
+    if err != nil {
+        http.Error(w, "Failed to convert latitude to float", 400)
+        return
+    }
+    longitude, err := strconv.ParseFloat(getPlacesInput.Longitude, 64)
+    if err != nil {
+        http.Error(w, "Failed to convert longitude to float", 400)
+        return
+    }
+    radiusDegrees, err := strconv.ParseFloat(getPlacesInput.Radius, 64)
+    if err != nil {
+        http.Error(w, "Failed to convert radius to float", 64)
+        return
+    }
+    radius := milesToDegrees(radiusDegrees)
+
+    center := NewPoint(latitude, longitude)
+    circle := NewCircle(
+        *center,
+        radius,
+    )
+    output := GetPlacesOutput{}
+    output.UserID = getPlacesInput.UserID
+    
+    tableData := response.Items
+    for _, ddb_place := range tableData {
+        place := &Place{}
+        err = dynamodbattribute.ConvertFromMap(ddb_place, place)
+        if err == nil {
+            latitude, err := strconv.ParseFloat(place.Latitude, 64)
+            if err != nil {
+                continue
+            }
+            longitude, err := strconv.ParseFloat(place.Longitude, 64)
+            if err != nil {
+                continue
+            } 
+            placePoint := NewPoint(latitude, longitude)
+            if isPointInCircle(*circle, *placePoint) {
+                output.Places = append(output.Places, place)
+            }
+        }
+    }
+    
+    raw, err = json.Marshal(output)
+    if err != nil {
+        http.Error(w, "Failed to marshal response", 400)
+        return
+    }
+    w.Write(raw) 
+}
+
 func getPlacesById(w http.ResponseWriter, r *http.Request) {
     raw, err := ioutil.ReadAll(r.Body)
     if err != nil {
         http.Error(w, "Failed to read request body", 400)
+        return
     }
     log.Print("Read request body")
 
@@ -22,6 +100,7 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
     err = json.Unmarshal(raw, getPlaceInput)
     if err != nil {
         http.Error(w, "Failed to unmarshal", 400)
+        return
     }
     log.Print("Unmarshaled")
 
@@ -42,7 +121,7 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
         },
     }
 
-    output := GetPlacesByIdOutput{}
+    output := GetPlacesOutput{}
     output.UserID = getPlaceInput.UserID
 
     response, err := ddb.BatchGetItem(getItemInput)
@@ -65,7 +144,6 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
         http.Error(w, "Failed to marshal response", 400)
         return
     }
-
     w.Write(raw)
 }
 

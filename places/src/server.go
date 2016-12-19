@@ -33,6 +33,9 @@ func main() {
     router.HandleFunc("/get_by_ids", getPlacesById).
         Methods("POST")
 
+    router.HandleFunc("/get_by_distance", getPlacesInRange).
+        Methods("POST")
+
     http.Handle("/", router)
 
     log.Print("Starting server on port 3000")
