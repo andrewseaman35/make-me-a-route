@@ -1,0 +1,11 @@
+# Visual Studio Code #
+.vscode/
+
+# Distributions #
+**/build/*.zip
+
+# Virutal Environments #
+virtualenvs/
+
+# Python #
+**/*.pyc
