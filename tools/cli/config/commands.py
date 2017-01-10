@@ -10,12 +10,15 @@ _cli_options = {
         ("env", {
             "default": "dev",
             "type": str,
-            "validations": []
+            "validations": [
+            ]
         }),
         ("latitude", {
             "default": 0.00000,
             "type": float,
-            "validations": []
+            "validations": [
+                ("less_than", 5)
+            ]
         }),
         ("longitude", {
             "default": 0.00000,

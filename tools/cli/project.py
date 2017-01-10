@@ -6,6 +6,8 @@ import click
 
 from config.config import Config
 from config.commands import get_arguments
+from utils.exceptions import ValidationError
+from utils.value_validator import ValueValidator
 
 
 _global_options = [
@@ -13,9 +15,7 @@ _global_options = [
 ]
 
 def add_options(options):
-    """
-    Decorator to add a list of click options to command.
-    """
+    """Decorator to add a list of click options to command."""
     def _add_options(func):
         for option in reversed(options):
             func = option(func)
@@ -23,33 +23,30 @@ def add_options(options):
     return _add_options
 
 def validate_input(value, validations):
-    """
-    Validates the value against the required validations.
+    """Validates the value against the required validations.
 
-    TODO: determine how validations will work with commands.py
+    Raises:
+       ValidationError if any validation does not pass
     """
-    return True
+    validator = ValueValidator(value)
+    for func_name, comparison in validations:
+        if not validator.validated(func_name, comparison):
+            raise ValidationError("Failed to validate: {} {} {}".format(value, func_name, comparison))
 
 def typed_input(value, param):
-    """
-    Validate value to parameter specifications and convert to desired type.
-    """
+    """Validate value to parameter specifications and convert to desired type."""
     converted = param["type"](value)
 
-    if not validate_input(value, param["validations"]):
-        raise ValidationError("Value not valid")
+    validate_input(converted, param["validations"])
 
     return converted
 
 def typed_default(param):
-    """
-    Get default value and convert to specified type.
-    """
+    """Get default value and convert to specified type."""
     return param["type"](param["default"])
 
 def gather_parameters(params):
-    """
-    Requests parameter input from the user, uses default values if no input is received. 
+    """Requests parameter input from the user, uses default values if no input is received. 
 
     Validates and converts all inputs to defined types, returns dict.
     """
@@ -70,18 +67,14 @@ def gather_parameters(params):
 
 @click.group()
 def cli(**kwargs):
-    """
-    Click group for all commands.
-    """
+    """Click group for all commands."""
     pass
 
 """ Places API """
 @click.command()
 @add_options(_global_options)
 def add_place(**kwargs):
-    """
-    Add place endpoint: /add
-    """
+    """Add place endpoint: /add"""
     click.echo("adding place")
     args = gather_parameters(get_arguments("add_place", kwargs))
 

@@ -6,21 +6,29 @@ class ValueValidator():
         self._value = value
         self._functions = ValidatorFunctions(self._value)
 
+    def validated(self, func_name, compare_to):
+        """Performs a single validation."""
+        return self._functions.get(func_name)(compare_to)
+
 class ValidatorFunctions():
     def __init__(self, value):
         self._value = value
-        self._value_type = type(value)
         self._functions = {
             'generic': {
                 'less_than': self._value.__lt__,
-                'greater_than': self._value.__gt__
+                'greater_than': self._value.__gt__,
+                'equal_to': self._value.__eq__,
             },
             str: {
-                'in': self._value.__gt__,
             }
         }
 
     def _default(self, **kwargs):
+        """Returned function if validator function is not found.
+
+        Raises:
+           NotImplementedError always
+        """
         raise NotImplementedError("Comparison function not found for type {}: {}".format(
             kwargs['val_type'],
             kwargs['fun_name']
@@ -30,11 +38,8 @@ class ValidatorFunctions():
         """
         Returns the requested function for the type of _value.
         First checks _functions[type], if not found, checks _functions['generic'].
-
-        Raises:
-           NotImplementedError if function not found
         """
-        func = self._functions[type(self._value)].get(name, None)
+        func = self._functions.get(type(self._value), {}).get(name, None)
         func = func or self._functions['generic'].get(name, None)
         func = func or partial(self._default, val_type=type(self._value), fun_name=name)
         return func
@@ -44,7 +49,7 @@ class ValidatorFunctions():
         Returns a list of the functions defined for the stored value. Value type can be
         specified as value_type argument.
         """
-        return self._functions.get(value_type or self._value_type, {}).keys()
+        return self._functions.get(value_type or type(self._value), {}).keys()
 
     def list_all(self):
         """
