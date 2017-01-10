@@ -1,6 +1,7 @@
 """
 Command line tool to access services.
 """
+from json import dumps
 import click
 
 from config.config import Config
@@ -43,9 +44,15 @@ def typed_input(value, param):
 
     return converted
 
+def typed_default(param):
+    """
+    Get default value and convert to specified type.
+    """
+    return param["type"](param["default"])
+
 def gather_parameters(params):
     """
-    Requests parameter input from the user.
+    Requests parameter input from the user, uses default values if no input is received. 
 
     Validates and converts all inputs to defined types, returns dict.
     """
@@ -53,6 +60,8 @@ def gather_parameters(params):
     for param in params:
         while param[0] not in inputs:
             value = input("{} [{}]: ".format(param[0].title(), param[1]["default"]))
+            if len(value) == 0:
+                value = typed_default(param[1])
             try:
                 value = typed_input(value, param[1])
                 inputs[param[0]] = value
@@ -78,6 +87,8 @@ def add_place(**kwargs):
     """
     click.echo("adding place")
     args = gather_parameters(get_arguments("add_place", kwargs))
+
+    click.echo(dumps(args, indent=4))
 
 
 cli.add_command(add_place)
