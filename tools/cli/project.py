@@ -12,9 +12,6 @@ _global_options = [
     click.option("--env", default="dev", help="environment")
 ]
 
-class ValidationError(Exception):
-    pass
-
 def add_options(options):
     """
     Decorator to add a list of click options to command.
