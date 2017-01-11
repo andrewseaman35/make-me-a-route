@@ -20,7 +20,7 @@ _cli_options = {
                 ("longer_than", 3)
             ]
         }),
-        ("type", {
+        ("place_type", {
             "default": "general",
             "type": str,
             "validations": [

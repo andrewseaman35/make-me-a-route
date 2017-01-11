@@ -1,3 +1,6 @@
+# Config #
+tools/cli/config/project.cfg
+
 # Visual Studio Code #
 .vscode/
 
@@ -12,3 +15,6 @@ virtualenvs/
 
 # OSX #
 .DS_Store
+
+# Vim #
+**/*.sw?

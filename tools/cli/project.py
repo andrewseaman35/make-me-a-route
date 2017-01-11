@@ -8,7 +8,7 @@ from config.config import Config
 from config.commands import get_arguments
 from utils.py_value_validator.value_validator import ValueValidator, ValidationError
 from utils.validator_functions import ValidatorFunctions
-
+from utils.request_handler import http_request
 
 _global_options = [
     click.option("--env", help="environment")
@@ -24,6 +24,13 @@ def add_options(options):
             func = option(func)
         return func
     return _add_options
+
+def get_user_id():
+    """Gets user id.
+
+    TODO: after authentication is in place, get this working properly.
+    """
+    return "cli_user"
 
 def validate_value(value, validations):
     """Validates the value against the required validations.
@@ -51,7 +58,9 @@ def gather_parameters(kwargs, params):
 
     Validates and converts all inputs to defined types, returns dict.
     """
-    inputs = {}
+    inputs = {
+        'user_id': get_user_id()
+    }
     for param in params:
         while param[0] not in inputs:
             if param[0] not in kwargs:
@@ -87,14 +96,17 @@ def cli(**kwargs):
 @add_options(_global_options)
 def add_place(**kwargs):
     """Add place endpoint: /add"""
-    click.echo("adding place")
+    action_name = "add_place"
 
-    # Remove all kwargs that were not inputted
+    # Remove all kwargs that were not inputted and gather the rest
     filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+    args = gather_parameters(filtered_kwargs, get_arguments(action_name))
 
-    args = gather_parameters(filtered_kwargs, get_arguments("add_place"))
+    url = Config(args['env']).places_url + "add"
+    del args['env']
 
     click.echo(dumps(args, indent=4))
+    click.echo(http_request("post", url, args))
 
 
 cli.add_command(add_place)
