@@ -7,12 +7,16 @@ import click
 from config.config import Config
 from config.commands import get_arguments
 from utils.exceptions import ValidationError
-from utils.value_validator import ValueValidator
+from utils.py_value_validator.value_validator import ValueValidator, ValidationError
+from utils.validator_functions import ValidatorFunctions
 
 
 _global_options = [
-    click.option("--env", default="dev", help="environment")
+    click.option("--env", help="environment")
 ]
+
+_validator_functions = ValidatorFunctions()
+_validator = ValueValidator(_validator_functions)
 
 def add_options(options):
     """Decorator to add a list of click options to command."""
@@ -28,10 +32,7 @@ def validate_input(value, validations):
     Raises:
        ValidationError if any validation does not pass
     """
-    validator = ValueValidator(value)
-    for func_name, comparison in validations:
-        if not validator.validated(func_name, comparison):
-            raise ValidationError("Failed to validate: {} {} {}".format(value, func_name, comparison))
+    _validator.validate(value, validations)
 
 def typed_input(value, param):
     """Validate value to parameter specifications and convert to desired type."""
@@ -76,7 +77,11 @@ def cli(**kwargs):
 def add_place(**kwargs):
     """Add place endpoint: /add"""
     click.echo("adding place")
-    args = gather_parameters(get_arguments("add_place", kwargs))
+
+    # Remove all kwargs that were not inputted
+    filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+
+    args = gather_parameters(get_arguments("add_place", filtered_kwargs))
 
     click.echo(dumps(args, indent=4))
 
