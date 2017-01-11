@@ -14,6 +14,24 @@ _cli_options = {
                 ("in", ["dev", "test", "green", "blue", "local"])
             ]
         }),
+        ("name", {
+            "type": str,
+            "validations": [
+                ("longer_than", 3)
+            ]
+        }),
+        ("type", {
+            "default": "general",
+            "type": str,
+            "validations": [
+                ("longer_than", 3)
+            ]
+        }),
+        ("description", {
+            "default": "No description",
+            "type": str,
+            "validations": []
+        }),
         ("latitude", {
             "default": 0.00000,
             "type": float,

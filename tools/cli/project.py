@@ -43,7 +43,8 @@ def typed_input(value, param):
 
 def typed_default(param):
     """Get default value and convert to specified type."""
-    return param["type"](param["default"])
+    default_value = param.get("default", None)
+    return None if default_value is None else param["type"](default_value)
 
 def gather_parameters(kwargs, params):
     """Requests parameter input from the user, uses default values if no input is received. 
@@ -54,8 +55,15 @@ def gather_parameters(kwargs, params):
     for param in params:
         while param[0] not in inputs:
             if param[0] not in kwargs:
-                value = input("{} [{}]: ".format(param[0].title(), param[1]["default"]))
+                default = typed_default(param[1])
+                out = "{}".format(param[0])
+                if default is not None:
+                    out += " [{}]".format(default)
+                value = input(out + ": ")
                 if len(value) == 0:
+                    if default is None:
+                        click.echo("No default value available")
+                        continue
                     value = typed_default(param[1])
             else:
                 value = kwargs[param[0]]
