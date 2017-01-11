@@ -48,9 +48,44 @@ _cli_options = {
                 ("greater_than_equal", -90)
             ]
         })
+    ]),
+    "get_places_in_range": OrderedDict([
+        ("env", {
+            "default": "dev",
+            "type": str,
+            "validations": [
+                ("in", ["dev", "test", "green", "blue", "local"])
+            ]
+        }),
+        ("latitude", {
+            "default": 0.0,
+            "type": float,
+            "validations": [
+                ("less_than_equal", 90),
+                ("greater_than_equal", -90)
+            ]
+        }),
+        ("longitude", {
+            "default": 0.00000,
+            "type": float,
+            "validations": [
+                ("less_than_equal", 90),
+                ("greater_than_equal", -90)
+            ]
+        }),
+        ("radius", {
+            "default": 10.0,
+            "type": float,
+            "validations": [
+                ("greater_than", 0)
+            ]
+        })
     ])
 }
 
 def get_arguments(command, defined={}):
+    """Returns a list of tuples specifying the required arguments for the given action
+    and argument specifications. Excludes any arguments that are in `defined`.
+    """
     return [(key, _cli_options[command][key]) for key in _cli_options[command] \
                        if key not in defined]

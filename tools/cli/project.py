@@ -105,11 +105,25 @@ def add_place(**kwargs):
     url = Config(args['env']).places_url + "add"
     del args['env']
 
-    click.echo(dumps(args, indent=4))
-    click.echo(http_request("post", url, args))
+    click.echo(dumps(http_request("post", url, args), indent=4))
 
+@click.command()
+@add_options(_global_options)
+def get_places_in_range(**kwargs):
+    """Add place endpoint: /get_by_distance"""
+    action_name = "get_places_in_range"
+
+    # Remove all kwargs that were not inputted and gather the rest
+    filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+    args = gather_parameters(filtered_kwargs, get_arguments(action_name))
+
+    url = Config(args['env']).places_url + "get_by_distance"
+    del args['env']
+
+    click.echo(dumps(http_request("post", url, args), indent=4))
 
 cli.add_command(add_place)
+cli.add_command(get_places_in_range)
 
 if __name__ == "__main__":
     cli()
