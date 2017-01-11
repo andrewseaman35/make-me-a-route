@@ -6,7 +6,6 @@ import click
 
 from config.config import Config
 from config.commands import get_arguments
-from utils.exceptions import ValidationError
 from utils.py_value_validator.value_validator import ValueValidator, ValidationError
 from utils.validator_functions import ValidatorFunctions
 
@@ -26,7 +25,7 @@ def add_options(options):
         return func
     return _add_options
 
-def validate_input(value, validations):
+def validate_value(value, validations):
     """Validates the value against the required validations.
 
     Raises:
@@ -38,7 +37,7 @@ def typed_input(value, param):
     """Validate value to parameter specifications and convert to desired type."""
     converted = param["type"](value)
 
-    validate_input(converted, param["validations"])
+    validate_value(converted, param["validations"])
 
     return converted
 
@@ -46,7 +45,7 @@ def typed_default(param):
     """Get default value and convert to specified type."""
     return param["type"](param["default"])
 
-def gather_parameters(params):
+def gather_parameters(kwargs, params):
     """Requests parameter input from the user, uses default values if no input is received. 
 
     Validates and converts all inputs to defined types, returns dict.
@@ -54,9 +53,13 @@ def gather_parameters(params):
     inputs = {}
     for param in params:
         while param[0] not in inputs:
-            value = input("{} [{}]: ".format(param[0].title(), param[1]["default"]))
-            if len(value) == 0:
-                value = typed_default(param[1])
+            if param[0] not in kwargs:
+                value = input("{} [{}]: ".format(param[0].title(), param[1]["default"]))
+                if len(value) == 0:
+                    value = typed_default(param[1])
+            else:
+                value = kwargs[param[0]]
+                del kwargs[param[0]]
             try:
                 value = typed_input(value, param[1])
                 inputs[param[0]] = value
@@ -81,7 +84,7 @@ def add_place(**kwargs):
     # Remove all kwargs that were not inputted
     filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
 
-    args = gather_parameters(get_arguments("add_place", filtered_kwargs))
+    args = gather_parameters(filtered_kwargs, get_arguments("add_place"))
 
     click.echo(dumps(args, indent=4))
 
