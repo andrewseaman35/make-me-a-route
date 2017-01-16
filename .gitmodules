@@ -1,3 +1,0 @@
-[submodule "tools/cli/utils/py_value_validator"]
-	path = tools/cli/utils/py_value_validator
-	url = git@github.com:andrewseaman35/py_value_validator.git

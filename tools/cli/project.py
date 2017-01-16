@@ -2,11 +2,11 @@
 Command line tool to access services.
 """
 from json import dumps
+from py_value_validator.value_validator import ValueValidator, ValidationError
 import click
 
 from config.config import Config
 from config.commands import get_arguments
-from utils.py_value_validator.value_validator import ValueValidator, ValidationError
 from utils.validator_functions import ValidatorFunctions
 from utils.request_handler import http_request
 

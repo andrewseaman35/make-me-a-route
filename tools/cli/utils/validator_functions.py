@@ -1,4 +1,4 @@
-from utils.py_value_validator.value_validator import GenericValidatorFunctions
+from py_value_validator.value_validator import GenericValidatorFunctions
 
 class ValidatorFunctions(GenericValidatorFunctions):
     def add_typed_functions(self):
