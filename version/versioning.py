@@ -112,7 +112,7 @@ def main():
     initialize_arguments(parser)
     args = parser.parse_args()
     if not validate_arguments(args):
-        raise Exception("Invalid arguments")
+        return ""
 
     version_file = read_version_file()
     versions = version_file["versions"]
