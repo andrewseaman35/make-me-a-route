@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -12,9 +13,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
+// getPlacesByInRange gathers all of the stored places that are within
+// the given distance of the given latitude and longitude.
 func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
 	raw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		fmt.Printf("Failed to read request body: %s", err)
 		http.Error(w, "Failed to read request body", 400)
 		return
 	}
@@ -22,6 +26,7 @@ func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
 	getPlacesInput := &GetPlacesInRangeInput{}
 	err = json.Unmarshal(raw, getPlacesInput)
 	if err != nil {
+		fmt.Printf("Failed to unmarshal: %s", err)
 		http.Error(w, "Failed to unmarshal", 400)
 		return
 	}
@@ -33,21 +38,25 @@ func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
 
 	response, err := ddb.Scan(scanInput)
 	if err != nil {
+		fmt.Printf("Failed to scan: %s", err)
 		http.Error(w, "Failed to scan", 400)
 		return
 	}
 	latitude, err := strconv.ParseFloat(getPlacesInput.Latitude, 64)
 	if err != nil {
+		fmt.Printf("Failed to convert latitude to float: %s", err)
 		http.Error(w, "Failed to convert latitude to float", 400)
 		return
 	}
 	longitude, err := strconv.ParseFloat(getPlacesInput.Longitude, 64)
 	if err != nil {
+		fmt.Printf("Failed to convert longitude to float: %s", err)
 		http.Error(w, "Failed to convert longitude to float", 400)
 		return
 	}
 	radiusDegrees, err := strconv.ParseFloat(getPlacesInput.Radius, 64)
 	if err != nil {
+		fmt.Printf("Failed to convert radius to float: %s", err)
 		http.Error(w, "Failed to convert radius to float", 64)
 		return
 	}
@@ -83,15 +92,18 @@ func getPlacesInRange(w http.ResponseWriter, r *http.Request) {
 
 	raw, err = json.Marshal(output)
 	if err != nil {
+		fmt.Printf("Failed to marshal response: %s", err)
 		http.Error(w, "Failed to marshal response", 400)
 		return
 	}
 	w.Write(raw)
 }
 
+// getPlacesById retrieves all places with the listed IDs
 func getPlacesById(w http.ResponseWriter, r *http.Request) {
 	raw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		fmt.Printf("Failed to read request body: %s", err)
 		http.Error(w, "Failed to read request body", 400)
 		return
 	}
@@ -100,6 +112,7 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
 	getPlaceInput := &GetPlacesByIdInput{}
 	err = json.Unmarshal(raw, getPlaceInput)
 	if err != nil {
+		fmt.Printf("Failed to unmarshal: %s", err)
 		http.Error(w, "Failed to unmarshal", 400)
 		return
 	}
@@ -127,6 +140,7 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
 
 	response, err := ddb.BatchGetItem(getItemInput)
 	if err != nil {
+		fmt.Printf("Error batch getting items: %s", err)
 		log.Print("Error batch getting items")
 		return
 	}
@@ -142,15 +156,18 @@ func getPlacesById(w http.ResponseWriter, r *http.Request) {
 
 	raw, err = json.Marshal(output)
 	if err != nil {
+		fmt.Printf("Failed to marshal response: %s", err)
 		http.Error(w, "Failed to marshal response", 400)
 		return
 	}
 	w.Write(raw)
 }
 
+// addPlace adds a place with the specified parameters.
 func addPlace(w http.ResponseWriter, r *http.Request) {
 	raw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		fmt.Printf("Failed read request body: %s", err)
 		http.Error(w, "Failed to read request body", 400)
 		return
 	}
@@ -159,6 +176,7 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
 	placeInput := &NewPlaceInput{}
 	err = json.Unmarshal(raw, placeInput)
 	if err != nil {
+		fmt.Printf("Failed to unmarshal: %s", err)
 		http.Error(w, "Failed to unmarshal", 400)
 		return
 	}
@@ -215,12 +233,14 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
 	response, err := ddb.PutItem(putItemInput)
 	log.Print("Put item")
 	if err != nil {
+		fmt.Printf("Failed to put item: %s", err)
 		http.Error(w, err.Error(), 400)
 		return
 	}
 
 	raw, err = json.Marshal(response)
 	if err != nil {
+		fmt.Printf("Failed to marshal response: %s", err)
 		http.Error(w, "Failed to marshal response", 400)
 		return
 	}
@@ -228,9 +248,11 @@ func addPlace(w http.ResponseWriter, r *http.Request) {
 	w.Write(raw)
 }
 
+// deletePlacesById deletes stored placed by the given IDs.
 func deletePlacesById(w http.ResponseWriter, r *http.Request) {
 	raw, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		fmt.Printf("Failed to read request body: %s", err)
 		http.Error(w, "Failed to read request body", 400)
 		return
 	}
@@ -239,6 +261,7 @@ func deletePlacesById(w http.ResponseWriter, r *http.Request) {
 	deletePlacesInput := &DeletePlacesInput{}
 	err = json.Unmarshal(raw, deletePlacesInput)
 	if err != nil {
+		fmt.Printf("Failed to unmarshal: %s", err)
 		http.Error(w, "Failed to unmarshal", 400)
 		return
 	}
@@ -257,14 +280,15 @@ func deletePlacesById(w http.ResponseWriter, r *http.Request) {
 
 		_, err := ddb.DeleteItem(deleteItemInput)
 		if err != nil {
-			log.Print("Error deleting item: %s", id)
-			break
+			fmt.Printf("Error deleting item: %s", id)
+		} else {
+			deletePlacesOutput.IDs = append(deletePlacesOutput.IDs, id)
 		}
-		deletePlacesOutput.IDs = append(deletePlacesOutput.IDs, id)
 	}
 
 	raw, err = json.Marshal(deletePlacesOutput)
 	if err != nil {
+		fmt.Printf("Failed to marshal response: %s", err)
 		http.Error(w, "Failed to marshal response", 400)
 		return
 	}
