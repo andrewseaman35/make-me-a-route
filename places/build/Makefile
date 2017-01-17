@@ -12,6 +12,8 @@ VERSION := $(shell cd $(VERSIONING_DIR) && python $(VERSIONING_SCRIPT) --service
 DOCKER_FILES := Dockerfile Dockerrun.aws.json
 ZIP_NAME := places-service.zip
 
+DIR_OUT := ../out
+
 $(ZIP_NAME):
 	echo Zipping version $(VERSION)
 	cd ../src; zip -r9 $(ZIP_NAME) .; mv $(ZIP_NAME) ../build
@@ -25,5 +27,6 @@ deploy: build
 
 clean:
 	rm -f $(ZIP_NAME)
+	rm -rf $(DIR_OUT)
 
 .PHONY: clean build zip deploy
