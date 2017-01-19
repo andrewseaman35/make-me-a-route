@@ -4,8 +4,9 @@ tools/cli/config/project.cfg
 # Visual Studio Code #
 .vscode/
 
-# Distributions #
+# Rebuildables #
 **/build/*.zip
+out/
 
 # Virutal Environments #
 virtualenvs/
