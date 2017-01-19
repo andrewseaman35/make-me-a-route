@@ -2,6 +2,7 @@
 Command line tool to access services.
 """
 from json import dumps
+import sys
 from py_value_validator.value_validator import ValueValidator, ValidationError
 import click
 
@@ -42,9 +43,13 @@ def validate_value(value, validations):
 
 def typed_input(value, param):
     """Validate value to parameter specifications and convert to desired type."""
-    converted = param["type"](value)
+    try:
+        converted = param["type"](value)
+    except KeyError:
+        click.echo("Type must be defined in commands.py")
+        sys.exit(1)
 
-    validate_value(converted, param["validations"])
+    validate_value(converted, param.get("validations", []))
 
     return converted
 
@@ -122,8 +127,24 @@ def get_places_in_range(**kwargs):
 
     click.echo(dumps(http_request("post", url, args), indent=4))
 
+@click.command()
+@add_options(_global_options)
+def delete_place_by_id(**kwargs):
+    """Delete place endpoint: /delete"""
+    action_name = "delete_place_by_id"
+
+    # Remove all kwargs that were not inputted and gather the rest
+    filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+    args = gather_parameters(filtered_kwargs, get_arguments(action_name))
+
+    url = Config(args['env']).places_url + "delete_by_ids"
+    del args['env']
+
+    click.echo(dumps(http_request("post", url, args), indent=4))
+
 cli.add_command(add_place)
 cli.add_command(get_places_in_range)
+cli.add_command(delete_place_by_id)
 
 if __name__ == "__main__":
     cli()

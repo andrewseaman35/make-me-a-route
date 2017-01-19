@@ -80,6 +80,18 @@ _cli_options = {
                 ("greater_than", 0)
             ]
         })
+    ]),
+    "delete_place_by_id": OrderedDict([
+        ("env", {
+            "default": "dev",
+            "type": str,
+            "validations": [
+                ("in", ["dev", "test", "green", "blue", "local"])
+            ]
+        }),
+        ("id", {
+            "type": str
+        })
     ])
 }
 
