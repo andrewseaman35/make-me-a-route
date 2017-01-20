@@ -92,6 +92,19 @@ _cli_options = {
         ("id", {
             "type": str
         })
+    ]),
+    "get_places_by_id": OrderedDict([
+        ("env", {
+            "default": "dev",
+            "type": str,
+            "validations": [
+                ("in", ["dev", "test", "green", "blue", "local"])
+            ]
+        }),
+        ("ids", {
+            "type": list,
+            "validations": []
+        })
     ])
 }
 

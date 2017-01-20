@@ -1,13 +1,19 @@
 """
 Command line tool to access services.
 """
-from json import dumps
+# Standard Imports #
 import sys
-from py_value_validator.value_validator import ValueValidator, ValidationError
-import click
+from json import dumps
 
+# Nonstandard Imports #
+import click
+from py_value_validator.value_validator import ValueValidator, ValidationError
+
+# Local Imports #
 from config.config import Config
 from config.commands import get_arguments
+from utils.utils import stringify_dict
+from utils.type_converter import convert
 from utils.validator_functions import ValidatorFunctions
 from utils.request_handler import http_request
 
@@ -42,9 +48,11 @@ def validate_value(value, validations):
     _validator.validate(value, validations)
 
 def typed_input(value, param):
-    """Validate value to parameter specifications and convert to desired type."""
+    """Validate value to parameter specifications and convert to desired type.
+    List: assume that values are comma separated, strip spaces
+    """
     try:
-        converted = param["type"](value)
+        converted = convert(value, param["type"])
     except KeyError:
         click.echo("Type must be defined in commands.py")
         sys.exit(1)
@@ -59,7 +67,7 @@ def typed_default(param):
     return None if default_value is None else param["type"](default_value)
 
 def gather_parameters(kwargs, params):
-    """Requests parameter input from the user, uses default values if no input is received. 
+    """Requests parameter input from the user, uses default values if no input is received.
 
     Validates and converts all inputs to defined types, returns dict.
     """
@@ -69,7 +77,7 @@ def gather_parameters(kwargs, params):
     for param in params:
         while param[0] not in inputs:
             if param[0] not in kwargs:
-                default = typed_default(param[1])
+                default = param[1].get("default", None)
                 out = "{}".format(param[0])
                 if default is not None:
                     out += " [{}]".format(default)
@@ -78,7 +86,7 @@ def gather_parameters(kwargs, params):
                     if default is None:
                         click.echo("No default value available")
                         continue
-                    value = typed_default(param[1])
+                    value = default
             else:
                 value = kwargs[param[0]]
                 del kwargs[param[0]]
@@ -109,6 +117,7 @@ def add_place(**kwargs):
 
     url = Config(args['env']).places_url + "add"
     del args['env']
+    args = stringify_dict(args)
 
     click.echo(dumps(http_request("post", url, args), indent=4))
 
@@ -124,6 +133,7 @@ def get_places_in_range(**kwargs):
 
     url = Config(args['env']).places_url + "get_by_distance"
     del args['env']
+    args = stringify_dict(args)
 
     click.echo(dumps(http_request("post", url, args), indent=4))
 
@@ -139,12 +149,29 @@ def delete_place_by_id(**kwargs):
 
     url = Config(args['env']).places_url + "delete_by_ids"
     del args['env']
+    args = stringify_dict(args)
+
+    click.echo(dumps(http_request("post", url, args), indent=4))
+
+@click.command()
+@add_options(_global_options)
+def get_places_by_id(**kwargs):
+    """Get places by id endpoint: /get_by_ids [POST]"""
+    action_name = "get_places_by_id"
+
+    # Remove all kwargs that were not inputted and gather the rest
+    filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+    args = gather_parameters(filtered_kwargs, get_arguments(action_name))
+
+    url = Config(args['env']).places_url + "get_by_ids"
+    del args['env']
 
     click.echo(dumps(http_request("post", url, args), indent=4))
 
 cli.add_command(add_place)
 cli.add_command(get_places_in_range)
 cli.add_command(delete_place_by_id)
+cli.add_command(get_places_by_id)
 
 if __name__ == "__main__":
     cli()
