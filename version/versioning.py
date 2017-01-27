@@ -5,6 +5,8 @@ import os
 import sys
 import pickle
 
+from json import dumps
+
 import datetime
 
 from argparse import ArgumentParser
@@ -131,6 +133,8 @@ def main():
         version = increment_version(versions[args.service], "major")
     elif args.action == "get_last_modified_time":
         return metadata["modified_time"]
+    elif args.action == "get_all":
+        return dumps(versions, indent=4)
 
     versions[args.service] = version
 
