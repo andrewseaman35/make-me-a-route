@@ -2,15 +2,15 @@ ifndef ENV
 ENV:=dev
 endif
 
-SERVICE := places
-APPLICATION_NAME := places-service
+SERVICE := place-tags
+APPLICATION_NAME := place-tags-service
 
 VERSIONING_DIR := ../../version
 VERSIONING_SCRIPT := versioning.py
 
 VERSION := $(shell cd $(VERSIONING_DIR) && python $(VERSIONING_SCRIPT) --service $(SERVICE) --action get)
 DOCKER_FILES := Dockerfile Dockerrun.aws.json
-ZIP_NAME := places-service.zip
+ZIP_NAME := place-tags-service.zip
 
 DIR_OUT := ../out
 
