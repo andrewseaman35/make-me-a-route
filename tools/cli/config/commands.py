@@ -105,6 +105,28 @@ _cli_options = {
             "type": list,
             "validations": []
         })
+    ]),
+    "add_place_tag": OrderedDict([
+        ("env", {
+            "default": "dev",
+            "type": str,
+            "validations": [
+                ("in", ["dev", "test", "green", "blue", "local"])
+            ]
+        }),
+        ("name", {
+            "type": str,
+            "valdations": [
+                ("longer_than", 3)
+            ]
+        }),
+        ("description", {
+            "default": "No description",
+            "type": str,
+            "validations": [
+                ("longer_than", 3)
+            ]
+        })
     ])
 }
 

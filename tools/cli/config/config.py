@@ -15,6 +15,7 @@ class Config():
             environment = "dev"
 
         self.places_url = str(self._config.get(environment, "PlacesURL"))
+        self.place_tags_url = str(self._config.get(environment, "PlaceTagsURL"))
 
     def __str__(self):
         config_dict = self.__dict__
