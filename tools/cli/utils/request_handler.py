@@ -22,13 +22,13 @@ def _get_request(url, params):
     """Opens a get request with params specifying a query string."""
     request = requests.get(url, params=params)
 
-    return request.json()
+    return request
 
 def _post_request(url, params):
     """Opens a post request for the given endpoint and parameters."""
     data = dumps(params).encode("utf-8")
     request = requests.post(url, data=data)
-    return request.json()
+    return request
 
 _request_methods = {
     "get": _get_request,
