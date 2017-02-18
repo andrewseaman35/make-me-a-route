@@ -38,8 +38,8 @@ func main() {
 
 	http.Handle("/", router)
 
-	log.Print("Starting server on port 3000")
-	err = http.ListenAndServe(":3000", nil)
+	log.Print("Starting server on port 3001")
+	err = http.ListenAndServe(":3001", nil)
 
 	if err != nil {
 		log.Fatal(err)
