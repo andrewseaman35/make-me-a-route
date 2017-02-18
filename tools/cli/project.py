@@ -135,7 +135,22 @@ def get_place_tags_by_id(**kwargs):
 
     url = Config(args['env']).place_tags_url + "get_by_ids"
     del args['env']
-    response = http_request("post", url, args)
+
+    click.echo(dumps(http_request("post", url, args).json(), indent=4))
+
+
+@click.command()
+@add_options(_global_options)
+def delete_place_tags_by_id(**kwargs):
+    """Delete place tags by id endpoint: /delete_by_ids"""
+    action_name = "delete_place_tags_by_id"
+
+    # Remove all kwargs that were not inputted and gather the rest
+    filtered_kwargs = {key: kwargs[key] for key in kwargs if kwargs[key] is not None}
+    args = gather_parameters(filtered_kwargs, get_arguments(action_name))
+
+    url = Config(args['env']).place_tags_url + "delete_by_ids"
+    del args['env']
 
     click.echo(dumps(http_request("post", url, args).json(), indent=4))
 
@@ -208,6 +223,7 @@ def get_places_by_id(**kwargs):
 """ Place Tags API """
 cli.add_command(add_place_tag)
 cli.add_command(get_place_tags_by_id)
+cli.add_command(delete_place_tags_by_id)
 
 """ Places API """
 cli.add_command(add_place)
