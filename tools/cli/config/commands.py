@@ -127,7 +127,20 @@ _cli_options = {
                 ("longer_than", 3)
             ]
         })
-    ])
+    ]),
+    "get_place_tags_by_id": OrderedDict([
+        ("env", {
+            "default": "dev",
+            "type": str,
+            "validations": [
+                ("in", ["dev", "test", "green", "blue", "local"])
+            ]
+        }),
+        ("ids", {
+            "type": list,
+            "validations": []
+        })
+    ]),
 }
 
 def get_arguments(command, defined={}):
